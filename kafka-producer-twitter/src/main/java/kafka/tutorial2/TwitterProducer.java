@@ -41,7 +41,6 @@ public class TwitterProducer {
     }
 
     public void run(){
-
         logger.info("Setup");
 
         /** Set up your blocking queues: Be sure to size these properly based on expected TPS of your stream */
@@ -98,8 +97,14 @@ public class TwitterProducer {
 
         hosebirdEndpoint.trackTerms(terms);
 
-        // These secrets should be read from a config file
-        Authentication hosebirdAuth = new OAuth1(consumerKey, consumerSecret, token, secret);
+        Properties twitterTokens = getTwitterTokens();
+
+        Authentication hosebirdAuth = new OAuth1(
+            twitterTokens.getProperty("twitter.consumerKey"),
+            twitterTokens.getProperty("twitter.consumerSecret"),
+            twitterTokens.getProperty("twitter.accessToken"),
+            twitterTokens.getProperty("twitter.accessTokenSecret")
+        );
 
         ClientBuilder builder = new ClientBuilder()
                 .name("Hosebird-Client-01")                              // optional: mainly for the logs
@@ -135,5 +140,17 @@ public class TwitterProducer {
         // create the producer
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
         return producer;
+    }
+
+    private static Properties getTwitterTokens(){
+        Properties prop = new Properties();
+
+        try(InputStream input = new FileInputStream("resources/twitterTokens.properties")) {
+            prop.load(input);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        return prop;
     }
 }

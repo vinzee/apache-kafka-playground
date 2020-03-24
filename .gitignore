@@ -5,3 +5,5 @@ target/
 */.*
 .project
 .settings
+
+kafka-producer-twitter/resources/twitterTokens.properties
